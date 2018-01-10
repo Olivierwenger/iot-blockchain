@@ -103,6 +103,10 @@ voteAccess = function() {
     })
 }
 
+getAccess = function() {
+    
+}
+
 
 
 web3.eth.getAccountsPromise().then((result) => {
@@ -156,7 +160,9 @@ web3.eth.getAccountsPromise().then((result) => {
     for (var i = 0; i < ITER; i++) {
         askAccess().then(() => {
             console.log("access asked");
-            voteAccess();
+            voteAccess().then(() => {
+                getAccess();
+            })
             // var timer = 0;
             // let timerId = setInterval(() => iot.refreshTime({from: accounts[0]}), timelap);
             // setTimeout(() => clearInterval(timerId), timelapiter*timelap);

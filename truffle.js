@@ -12,3 +12,6 @@ module.exports = {
     timeout: 0, // used to have no timeout for test
   }
 };
+
+// with ganache-cli
+// ganache-cli -l 300000000 -p 7545 -g 1 --db blockchain
