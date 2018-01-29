@@ -117,17 +117,16 @@ function randomBool() {
 
 voteAccess = function() {
     //return new Promise((resolve, reject) => {
-        for (var i = 6; i < 9; i++) {
-            for (var j = 6; j < 9; j++) {
-                for (var k = 1; k < 6; k++) {
-                    console.log("vote access i j k"+i+j+k);
-                    var vote = randomBool();
-                    console.log(vote);
-                    iot.voteAccess(accounts[k], accounts[j], vote, {from: accounts[i]});
-                }
+    for (var i = 6; i < 9; i++) {
+        for (var j = 6; j < 9; j++) {
+            for (var k = 1; k < 6; k++) {
+                console.log("vote access i j k"+i+j+k);
+                var vote = randomBool();
+                iot.voteAccess(accounts[k], accounts[j], vote, {from: accounts[i]});
             }
         }
-        console.log("vote access finished");
+    }
+    console.log("vote access finished");
     //})
 }
 
@@ -137,10 +136,11 @@ getAccess = function() {
         var deviceAccess;
         for (var j = 6; j < 9; j++) {
             for (var k = 1; k < 6; k++) {
-                console.log("in the loop j k: "+j+k);
+                const lJ = j;
+                const lK = k;
                 iot.hasAccess.call(accounts[k], accounts[j], {from: accounts[0]})
                     .then((result) => {
-                        console.log("account "+j+ "has access to device "+k+" ? :"+result);
+                        console.log("account "+lJ+ " has access to device "+lK+" ? :"+result);
                     }).catch(err => {
                         console.log("error get access");
                         console.log(err);

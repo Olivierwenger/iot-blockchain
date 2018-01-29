@@ -9,7 +9,7 @@ contract IotAuth {
     address[16] public devices;
     bool[16][16] authorisedUsers;
     mapping(address => VoteAddManager) public voteAddManager;
-    mapping(uint => VoteAccess) public voteAccess;
+    mapping(uint => VoteAccess) public voteAccessM;
     mapping(address => UserList) vaKey; // vaKey[device].user[user] give back the key
     uint nbrUser = 0;
     uint nbrDevice = 0;
@@ -124,7 +124,7 @@ contract IotAuth {
         }
         key = ++nbrVoteAccess;
         vaKey[device].keyIndex[msg.sender] = key;
-        voteAccess[key] = VoteAccess(device, msg.sender, accesTime, 0, 0);
+        voteAccessM[key] = VoteAccess(device, msg.sender, accesTime, 0, 0);
         // self.data[key].keyIndex = keyIndex + 1;
         // self.keys[keyIndex].key = key;
         // self.size++;
@@ -141,7 +141,7 @@ contract IotAuth {
         if (users[msg.sender] != msg.sender) { //this user is not allowed to vote
             return false;
         }
-        VoteAccess storage newVote = voteAccess[keyIndex];
+        VoteAccess storage newVote = voteAccessM[keyIndex];
         if (yesVote) {
             newVote.yesVote++;
         } else {
@@ -149,13 +149,13 @@ contract IotAuth {
         }
         if (newVote.yesVote >= (nbrUser/2)) {
             IterableAccess.insert(access, device, user, newVote.accessTime);
-            delete voteAccess[keyIndex];
+            delete voteAccessM[keyIndex];
             vaKey[device].keyIndex[user] = 0;
         } else if (newVote.noVote >= (nbrUser/2)) {
-            delete voteAccess[keyIndex];
+            delete voteAccessM[keyIndex];
             vaKey[device].keyIndex[user] = 0;
         } else {
-            voteAccess[keyIndex] = newVote;
+            voteAccessM[keyIndex] = newVote;
         }
         return true;
         // if (worked) {
