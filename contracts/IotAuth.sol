@@ -15,7 +15,7 @@ contract IotAuth {
     uint nbrDevice = 0;
     uint nbrVoteAccess = 0;
 
-    event RegisterWorked();
+    //event RegisterWorked();
 
     struct UserList {
         mapping(address => uint) keyIndex;
@@ -128,7 +128,7 @@ contract IotAuth {
         // self.data[key].keyIndex = keyIndex + 1;
         // self.keys[keyIndex].key = key;
         // self.size++;
-        RegisterWorked();
+        //RegisterWorked();
         return true;
         
     }
@@ -197,4 +197,8 @@ contract IotAuth {
             IterableAccess.decrement(access, i);
         }
     }    
+
+    function hasAccess(address device, address user) public view returns (bool) {
+        return IterableAccess.contains(access, device, user);
+    }
 }

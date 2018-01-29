@@ -74,8 +74,13 @@ library IterableAccess {
         self.size--;
     }
 
-    function contains (itmap storage self, address device, address user) private view returns (bool) {
-        return self.data[device].data[user].keyIndex > 0;
+    function contains (itmap storage self, address device, address user) public view returns (bool) {
+        uint keyIndex = self.data[device].data[user].keyIndex;
+        if (keyIndex > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     function iterate_start (itmap storage self) public view returns (uint keyIndex) {

@@ -1,4 +1,5 @@
 var IotAuth = artifacts.require("./IotAuth.sol");
+const crypto = require('crypto');
 // var account0 = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57";
 // var account1 = '0xf17f52151EbEF6C7334FAD080c5704D77216b732';
 // var account2 = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
@@ -37,12 +38,19 @@ web3.eth.getAccountsPromise = function () {
     });
 };
 
+addManager = function(user, manager) {
+    return new Promise((resolve, reject) => {
+        iot.addManager(user, {from: manager})
+    })
+}
+
 addManagers = function() {
-    return Promise.all([
-        iot.addManager(accounts[7], {from: accounts[6]}),
-        iot.addManager(accounts[8], {from: accounts[6]}),
-        iot.addManager(accounts[9], {from: accounts[6]}),
-    ]);
+    Promise.all([
+        addManager(accounts[7], accounts[6]),
+        addManager(accounts[8], accounts[6]),
+        addManager(accounts[9], accounts[6]),
+    ]).then(result =>  resolve(result))
+    .catch(err => reject(err))
 }
 
 voteManagers = function() {
@@ -56,56 +64,93 @@ voteManagers = function() {
     ]);
 }
 
-registerDevices = function() {
-    return Promise.all([
-        iot.registerDevice({from: accounts[2]}),
-        iot.registerDevice({from: accounts[3]}),
-        iot.registerDevice({from: accounts[4]}),
-        iot.registerDevice({from: accounts[5]})
-    ]);
+registerDevice = function(account) {
+    console.log("register device account number: "+account);
+    return new Promise((resolve, reject) => {
+        iot.registerDevice({from: account})
+    });
 }
 
-askAccess = function() {
-    return Promise.all([
-        iot.askAccess(accounts[1], 60, {from: accounts[6]}),
-        iot.askAccess(accounts[2], 60, {from: accounts[6]}),
-        iot.askAccess(accounts[3], 60, {from: accounts[6]}),
-        iot.askAccess(accounts[4], 60, {from: accounts[6]}),
-        iot.askAccess(accounts[5], 60, {from: accounts[6]}),
-        iot.askAccess(accounts[1], 80, {from: accounts[7]}),
-        iot.askAccess(accounts[2], 80, {from: accounts[7]}),
-        iot.askAccess(accounts[3], 80, {from: accounts[7]}),
-        iot.askAccess(accounts[4], 80, {from: accounts[7]}),
-        iot.askAccess(accounts[5], 80, {from: accounts[7]}),
-        iot.askAccess(accounts[1], 100, {from: accounts[8]}),
-        iot.askAccess(accounts[2], 100, {from: accounts[8]}),
-        iot.askAccess(accounts[3], 100, {from: accounts[8]}),
-        iot.askAccess(accounts[4], 100, {from: accounts[8]}),
-        iot.askAccess(accounts[5], 100, {from: accounts[8]})
+registerDevices = function() {
+    Promise.all([
+        registerDevice(accounts[2]),
+        registerDevice(accounts[3]),
+        registerDevice(accounts[4]),
+        registerDevice(accounts[5])
     ])
+    .then((result) => {
+        return result;
+    }).catch(err => reject(err));
+}
+askAccess = function(user, time, fromAddress) {
+    console.log("askaccess");
+    return new Promise((resolve, reject) => {
+        iot.askAccess(user, time, {from: fromAddress});
+    });
+}
+
+askAccesses = function() {
+    Promise.all([
+        askAccess(accounts[1], 60, accounts[6]),
+        askAccess(accounts[2], 60, accounts[6]),
+        askAccess(accounts[3], 60, accounts[6]),
+        askAccess(accounts[4], 60, accounts[6]),
+        askAccess(accounts[5], 60, accounts[6]),
+        askAccess(accounts[1], 80, accounts[7]),
+        askAccess(accounts[2], 80, accounts[7]),
+        askAccess(accounts[3], 80, accounts[7]),
+        askAccess(accounts[4], 80, accounts[7]),
+        askAccess(accounts[5], 80, accounts[7]),
+        askAccess(accounts[1], 100, accounts[8]),
+        askAccess(accounts[2], 100, accounts[8]),
+        askAccess(accounts[3], 100, accounts[8]),
+        askAccess(accounts[4], 100, accounts[8]),
+        askAccess(accounts[5], 100, accounts[8])
+    ])
+    .then((result) => {
+        resolve(result);
+    }).catch(err => reject(err));
 }
 function randomBool() {
-    var a = new Uint8Array(1);
-    crypto.getRandomValues(a);
-    return a[0] > 127;
+    return Math.random() >= 0.5;
 }
 
 voteAccess = function() {
-    return new Promise((resolve, reject) => {
+    //return new Promise((resolve, reject) => {
         for (var i = 6; i < 9; i++) {
             for (var j = 6; j < 9; j++) {
-                for (var k = 1; j < 6; j++) {
-                    iot.voteAccess(accounts[k], accounts[j], randomBool(), {from: accounts[i]});
+                for (var k = 1; k < 6; k++) {
+                    console.log("vote access i j k"+i+j+k);
+                    var vote = randomBool();
+                    console.log(vote);
+                    iot.voteAccess(accounts[k], accounts[j], vote, {from: accounts[i]});
                 }
             }
-            
         }
-    })
+        console.log("vote access finished");
+    //})
 }
 
 getAccess = function() {
-    
+    // return new Promise((resolve, reject) => {
+        console.log("getAccess");
+        var deviceAccess;
+        for (var j = 6; j < 9; j++) {
+            for (var k = 1; k < 6; k++) {
+                console.log("in the loop j k: "+j+k);
+                iot.hasAccess.call(accounts[k], accounts[j], {from: accounts[0]})
+                    .then((result) => {
+                        console.log("account "+j+ "has access to device "+k+" ? :"+result);
+                    }).catch(err => {
+                        console.log("error get access");
+                        console.log(err);
+                    })
+            }
+        }
+    // })
 }
+
+
 
 
 
@@ -132,7 +177,8 @@ web3.eth.getAccountsPromise().then((result) => {
     console.log("testing creating twice the same account");
     console.assert(result !== accounts[1], "registred twice account 1");
     return registerDevices();
-}).then(() => {
+}).then((result) => {
+    console.log(result);
     console.log("registered devices...");
     return iot.getDevices.call({from: accounts[1]});
 }).then((result) => {
@@ -158,20 +204,32 @@ web3.eth.getAccountsPromise().then((result) => {
     console.log('nbr of managers after vote: ' + result);
     assert(result <= 3, "nbr of managers should'nt be higher than 3");
     for (var i = 0; i < ITER; i++) {
-        askAccess().then(() => {
+        // askAccesses().then(() => {
+        askAccesses()
             console.log("access asked");
-            voteAccess().then(() => {
-                getAccess();
-            })
+            voteAccess();
+            // voteAccess().then(() => {
+                console.log("access voted");
+               getAccess();
+            // })
             // var timer = 0;
             // let timerId = setInterval(() => iot.refreshTime({from: accounts[0]}), timelap);
             // setTimeout(() => clearInterval(timerId), timelapiter*timelap);
             for (var j = 0; j < timelapiter; j++) {
+                console.log("refresh time")
                 iot.refreshTime({from: accounts[0]});
+                console.log("finished 0")
             }
-        })
+            console.log("finished refresh time1")
+        // })
+        // .catch((e) => {
+        //     console.log("error");
+        //     console.log(e)
+        // })
+        console.log("finished refresh time2")
     }
 }).catch((e) => {
+    console.log("error");
     console.log(e);
 });
 
