@@ -1,6 +1,6 @@
 pragma solidity ^0.4.2;
 
-
+// This library allow us to iterate over the actual given access
 library IterableAccess {
     struct Access {
         address user;
@@ -20,8 +20,6 @@ library IterableAccess {
 
     struct UserIndex {
         mapping(address => IndexValue) data;
-        // uint keyIndex;
-        // Access value;
     }
     
     struct IndexValue {
@@ -108,9 +106,4 @@ library IterableAccess {
         key = self.keys[keyIndex].key;
         value = self.data[key[0]].data[key[1]].value;
     }
-
-    // function check_time (itmap storage self) private {
-
-    // }
-
 }
