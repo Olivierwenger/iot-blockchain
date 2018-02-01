@@ -12,12 +12,12 @@ contract IotAuth {
     uint nbrManagers = 0;
     uint nbrDevice = 0;
     uint nbrVoteAccess = 0;
-
+    IterableAccess.itmap access; // store all teh actual access with the remaining time
 
     struct UserList {
         mapping(address => uint) keyIndex;
     }
-    IterableAccess.itmap access;
+
     
     struct VoteAccess {    
         address device;     // the device the person want access

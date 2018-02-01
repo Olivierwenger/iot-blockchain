@@ -1,9 +1,10 @@
 var IotAuth = artifacts.require("./IotAuth.sol");
 const crypto = require('crypto');
+const bigInt = require("big-integer");
 
 
 var iot;
-const ITER= 32; // number of time user should request access
+const ITER= 13; // number of time user should request access
 const timelapiter = 11; // number of time oracle should send request time
 
 var accounts;
@@ -21,6 +22,24 @@ web3.eth.getAccountsPromise = function () {
         });
     });
 };
+/**
+ * Print stats at the end of the test.
+ */
+printStats = function() {
+    for (var i = 0; i < accounts.length; i++) {
+        console.log("account "+i+" spent " + ((100000000000000000000 - (web3.eth.getBalance(accounts[i]).toNumber()))/1000000000000000000));
+    }
+    var lastBlock = web3.eth.getBlock('latest').number;
+    var size = bigInt(0);
+    var block;
+    for (var i = 0; i <= lastBlock; i++) {
+         block = web3.eth.getBlock(i);
+            size = size.add(block.size); 
+    }
+    console.log("size in Bytes : " + size.toString());
+    console.log("size in KBytes : " + size/1000);
+    console.log("size in MB : " + size/1000000)
+}
 
 /**
  * promise to wait
@@ -109,7 +128,7 @@ askAccess = function(user, time, fromAddress) {
  * ask multiples access
  */
 askAccesses = function() {
-    console.log("askAccesses");
+   // console.log("askAccesses");
     Promise.all([
         askAccess(accounts[1], 60, accounts[6]),
         askAccess(accounts[2], 60, accounts[6]),
@@ -152,7 +171,7 @@ voteAccess = function() {
             }
         }
     }
-    console.log("vote access finished");
+    //console.log("vote access finished");
 }
 
 /**
@@ -166,7 +185,7 @@ getAccess = function() {
             const lK = k;
             iot.hasAccess.call(accounts[k], accounts[j], {from: accounts[0]})
                 .then((result) => {
-                    console.log("account "+lJ+ " has access to device "+lK+" ? :"+result);
+                   // console.log("account "+lJ+ " has access to device "+lK+" ? :"+result);
                 }).catch(err => {
                     console.log("error get access");
                     console.log(err);
@@ -241,11 +260,17 @@ web3.eth.getAccountsPromise().then((result) => {
             for (var j = 0; j < timelapiter; j++) {
                 // setTimeout(() => iot.refreshTime({from: accounts[0]}),1000)
                 delay(1000)
-                    .then(()=>iot.refreshTime({from: accounts[0]}));
+                    .then(()=> {
+                        iot.refreshTime({from: accounts[0]});
+                    }
+                );
             }
         })
         console.log("iter number: "+i);
     }
+}).then(() => {
+    delay(30000)
+    .then(() =>printStats())
 }).catch((e) => {
     console.log("error");
     console.log(e);
